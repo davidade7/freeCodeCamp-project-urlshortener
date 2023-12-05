@@ -29,8 +29,8 @@ mongoose.connect(process.env['MONGO_URI'], { useNewUrlParser: true, useUnifiedTo
 
 // Creating schema to store originalUrl and shorUrl
 const urlSchema = new mongoose.Schema({
-  originalUrl: String,
-  shortUrl: Number
+  original_url: String,
+  short_url: Number
 });
 
 const Url = mongoose.model('Url', urlSchema);
@@ -65,30 +65,30 @@ app.post('/api/shorturl', function(req, res) {
       // Else continue the process
       else {
         // Find url in DB
-        result = await Url.findOne({ originalUrl: userUrl }).exec();
+        result = await Url.findOne({ original_url: userUrl }).exec();
 
         // If the document exist, send response
         if (result) {
           console.log("document found");
-          res.json({originalUrl: result.originalUrl, shortUrl: result.shortUrl});
+          res.json({original_url: result.original_url, short_url: result.short_url});
         } 
         // Else we need to add the document
         else {
           console.log("this document is not found")
           
-          // get the last document of the collection to get the max shortUrl number
+          // get the last document of the collection to get the max short_url number
           let count = 0
-          let listOfDocument = await Url.find().sort({shortUrl: -1}).limit(1);
+          let listOfDocument = await Url.find().sort({short_url: -1}).limit(1);
           if (listOfDocument.length == 0) {
             count += 1
           } else {
-            count = listOfDocument[0].shortUrl + 1;
+            count = listOfDocument[0].short_url + 1;
           }          
 
-          // Creating a new document with the new shortUrl
+          // Creating a new document with the new short_url
           let urlToAdd = {
-            originalUrl: userUrl,
-            shortUrl: count
+            original_url: userUrl,
+            short_url: count
           }
           let newEntry = await new Url(urlToAdd).save();
           console.log("document created")
@@ -101,10 +101,10 @@ app.post('/api/shorturl', function(req, res) {
 });
 
 // API endpoint for /api/shorturl/:shorturl?
-app.get('/api/shorturl/:shorturl', async function(req, res) {
+app.get('/api/shorturl/:shorturl?', async function(req, res) {
   console.log('-------------------------------------')
-  let result = await Url.findOne({shortUrl: req.params.shorturl})
-  res.redirect(result.originalUrl);
+  let result = await Url.findOne({short_url: req.params.shorturl})
+  res.redirect(result.original_url);
 });
 
 app.listen(port, function() {
